@@ -2,6 +2,7 @@ package cron
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"sync"
 	"time"
@@ -185,6 +186,13 @@ func (c *Cron) AddJob(spec string, cmd Job) (EntryID, error) {
 func (c *Cron) ScheduleWithID(id any, schedule Schedule, cmd Job) EntryID {
 	c.runningMu.Lock()
 	defer c.runningMu.Unlock()
+
+	for _, entry := range c.entries {
+		if entry.ID == id {
+			return fmt.Errorf("an entry with this ID already exists: %d", id)
+		}
+	}
+
 	entry := &Entry{
 		ID:         id,
 		Schedule:   schedule,
